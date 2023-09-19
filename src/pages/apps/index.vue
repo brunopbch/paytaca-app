@@ -96,6 +96,13 @@ export default {
           smartBCHOnly: false
         },
         {
+          name: this.$t('Chats'),
+          iconName: 'chat',
+          path: '/apps/chat',
+          active: true,
+          smartBCHOnly: false
+        },
+        {
           name: this.$t('WalletInfo'),
           iconName: 'info',
           path: '/apps/wallet-info',
