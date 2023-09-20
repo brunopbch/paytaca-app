@@ -6,7 +6,14 @@
     />
 
     <ChatIndex
+      v-if="!openMessage"
       :state="state"
+      @open-message="openChat"
+    />
+    <ChatMessages
+      v-if="openMessage"
+      :chat-data="chatData"
+      @back="openMessage = false"
     />
 
     <FooterMenu
@@ -18,23 +25,34 @@
 import HeaderNav from 'src/components/header-nav.vue'
 import FooterMenu from 'src/components/chat/footerMenu.vue'
 import ChatIndex from 'src/components/chat/index.vue'
+import ChatMessages from 'src/components/chat/ChatMessages.vue'
 
 export default {
   data () {
     return {
       darkMode: this.$store.getters['darkmode/getStatus'],
-      state: 'chats'
+      state: 'chats',
+      openMessage: false,
+      chatData: null
     }
   },
   components: {
     HeaderNav,
     FooterMenu,
-    ChatIndex
+    ChatIndex,
+    ChatMessages
   },
   methods: {
     selectMenu (item) {
       console.log(item)
       this.state = item
+      this.openMessage = false
+    },
+    openChat (item) {
+      console.log('opening message')
+      // console.log(item)
+      this.chatData = item
+      this.openMessage = true
     }
   }
 }
