@@ -23,30 +23,171 @@
         <div class="text-capitalize" style="font-size: 15px; font-weight: 500; padding-top: 18px;">{{ chatInfo.sentFrom.name }}</div>
       </div>
 
-      <!-- Convo -->
-      <div class="q-mt-sm" style="background-color: #F2F3FC;" :style="`height: ${minHeight - 130}px`">
-        Hello
-      </div>
+      <q-separator :dark="darkMode"/>
 
+      <!-- Convo -->
+      <q-list ref="scrollTargetRef" :style="`height: ${minHeight - 130}px`" style="overflow: auto;">
+        <q-infinite-scroll
+          ref="infiniteScroll"
+          :items="convo"
+          :offset="0"
+          :scroll-target="scrollTargetRef"
+          reverse
+        >
+        <template v-slot:loading>
+          <div class="row justify-center q-my-md" v-if="!isloaded">
+            <q-spinner-dots color="primary" size="40px" />
+          </div>
+        </template>
+        <div v-for="(message, index) in convo.messages" :key="index">
+          <q-item>
+            <q-item-section>
+              <div class="q-px-md row justify-center">
+                <div style="width: 100%; max-width: 400px">
+                  <q-chat-message
+                    :name="message.owner ? 'me' : message.sender.name"
+                    :avatar="`https://ui-avatars.com/api/?background=random&name=${message.owner ? chatInfo.sentFrom.name : message.sender.name}&color=fffff`"
+                    :stamp="message.stamp"
+                    :sent="message.owner"
+                    :bg-color="message.owner ? 'blue-5' : 'grey-3'"
+                    :text-color="message.owner ? 'white' : 'black'"
+                    size="6"
+                  >
+                    <div>
+                      {{ message.text }}
+                    </div>
+                  </q-chat-message>
+                </div>
+              </div>
+            </q-item-section>
+          </q-item>
+        </div>
+        <div v-if="message" class="q-px-sm q-mx-lg">
+          <div style="width: 100%; max-width: 400px;">
+            <q-chat-message
+              name="me"
+              sent
+              :avatar="`https://ui-avatars.com/api/?background=random&name=${chatInfo.sentFrom.name}&color=fffff`"
+              bg-color="blue-5"
+            >
+              <q-spinner-dots size="2rem" />
+            </q-chat-message>
+          </div>
+        </div>
+        </q-infinite-scroll>
+      </q-list>
+
+      <!-- <div class="q-mt-sm" :style="`height: ${minHeight - 130}px`">
+        <div class="q-pa-md row justify-center">
+          <div style="width: 100%; max-width: 400px">
+            <q-chat-message
+              name="me"
+              avatar="https://cdn.quasar.dev/img/avatar3.jpg"
+              stamp="7 minutes ago"
+              sent
+              text-color="white"
+              bg-color="primary"
+            >
+              <div>
+                Hey there!
+              </div>
+
+              <div>
+                Have you seen Quasar?
+                <img src="https://cdn.quasar.dev/img/discord-omq.png" class="my-emoticon">
+              </div>
+            </q-chat-message>
+
+            <q-chat-message
+              name="Jane"
+              avatar="https://cdn.quasar.dev/img/avatar5.jpg"
+              bg-color="amber"
+            >
+              <q-spinner-dots size="2rem" />
+            </q-chat-message>
+          </div>
+        </div>
+      </div> -->
+
+
+      <q-separator :dark="darkMode"  class="q-mb-sm"/>
       <!-- Message Input -->
-      <div class="row q-pt-sm q-px-sm">
-        <q-input class="col q-px-sm" rounded outlined dense v-model="message" placeholder="Enter message..."></q-input>
-        <q-icon color="grey-7" size="lg" name='sym_o_send' @click="message = ''"/>&nbsp;
+      <div class="row q-pt-xs q-px-sm">
+        <q-input
+          class="col q-px-sm"
+          rounded
+          outlined
+          dense
+          v-model="message"
+          placeholder="Enter message..."
+          @update:modelValue="function(){
+              typingMessage()
+            }"
+          ></q-input>
+        <q-icon color="grey-7" size="lg" name='sym_o_send' @click="sendMessage"/>&nbsp;
       </div>
     </div>
   </q-card>
   </div>
 </template>
 <script>
+import { ref } from 'vue'
+import { debounce } from 'quasar'
 
 export default {
+  setup () {
+    const scrollTargetRef = ref(null)
+    return {
+      scrollTargetRef
+    }
+  },
   data () {
     return {
       darkMode: this.$store.getters['darkmode/getStatus'],
       minHeight: this.$q.platform.is.ios ? this.$q.screen.height - (95 + 130) : this.$q.screen.height - (70 + 110),
       chatInfo: null,
-      convo: null,
+      convo: {
+        chat_id: 1,
+        messages: [
+          {
+            id: 1,
+            sender: { id: 1, name: 'Leia' },
+            text: 'Hey there!',
+            stamp: '3 hours ago',
+            owner: true
+          },
+          {
+            id: 2,
+            sender: { id: 2, name: 'Ellie' },
+            text: 'Hey Whats up',
+            stamp: '3 hours ago',
+            owner: false
+          },
+          {
+            id: 3,
+            sender: { id: 1, name: 'Leia' },
+            text: 'Great!',
+            stamp: '2 hours ago',
+            owner: true
+          },
+          {
+            id: 4,
+            sender: { id: 1, name: 'Leia' },
+            text: 'You?',
+            stamp: '2 hours ago',
+            owner: true
+          },
+          {
+            id: 5,
+            sender: { id: 2, name: 'Ellie' },
+            text: 'Good',
+            stamp: '50 minutes ago',
+            owner: false
+          }
+        ]
+      },
       isloaded: false,
+      isTyping: false,
       message: ''
     }
   },
@@ -59,6 +200,20 @@ export default {
   },
   emits: ['back'],
   methods: {
+    typingMessage: debounce(async function () {
+      console.log('typing typing...')
+      this.isTyping = true
+
+      await this.$refs.infiniteScroll.reset()
+
+      const scrollElement = this.$refs.scrollTargetRef.$el
+      const test = this.$refs.infiniteScroll.$el
+      scrollElement.scrollTop = test.clientHeight
+    }, 500),
+    sendMessage () {
+      console.log('sending message')
+      this.message = ''
+    }
   },
   async mounted () {
     console.log('chat messages')
@@ -69,3 +224,10 @@ export default {
   }
 }
 </script>
+<style lang="scss" scoped>
+.my-emoticon {
+  vertical-align: middle;
+  height: 2em;
+  width: 2em;
+}
+</style>
