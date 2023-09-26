@@ -6,7 +6,7 @@
   >
     <div class="col row justify-evenly footer-btn-container q-ml-sm q-mr-sm q-gutter-xs">
       <button class="footer-icon-btn q-mr-xs btn-ellipse" :class="{'text-white': darkMode}" @click="onSelectMenu('archive')">
-          <q-icon class="mb-2" :class="isActive('archive') ? 'default-text-color' : 'inactive-color'" size="30px" name="sym_o_sms"/>
+          <q-icon class="mb-2" :class="isActive('archive') ? 'default-text-color' : 'inactive-color'" size="30px" name="sym_o_archive"/>
         <span>Archive</span>
       </button>
       <button class="footer-icon-btn q-mr-xs btn-ellipse" :class="{'text-white': darkMode}" @click="onSelectMenu('chats')">

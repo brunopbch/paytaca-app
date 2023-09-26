@@ -13,6 +13,7 @@
     <ChatMessages
       v-if="openMessage"
       :chat-data="chatData"
+      :type="type"
       @back="openMessage = false"
     />
 
@@ -33,7 +34,8 @@ export default {
       darkMode: this.$store.getters['darkmode/getStatus'],
       state: 'chats',
       openMessage: false,
-      chatData: null
+      chatData: null,
+      type: 'open-message'
     }
   },
   components: {
@@ -50,9 +52,10 @@ export default {
     },
     openChat (item) {
       console.log('opening message')
-      // console.log(item)
-      this.chatData = item
+      console.log('data: ', item)
+      this.chatData = item.info
       this.openMessage = true
+      this.type = item.type
     }
   }
 }

@@ -6,7 +6,21 @@
       :style="`height: ${minHeight}px;`"
     >
     <div v-if="isloaded">
-      <div class="row">
+      <div v-if="type === 'compose'">
+        <div class="row">
+          <q-btn
+            flat
+            padding="md"
+            icon="arrow_back"
+            @click="$emit('back')"
+          />
+          <div style="padding-top: 18px;">
+            To:
+          </div>&nbsp;&nbsp;
+          <q-input class="q-pt-sm" v-model="receiver" borderless dense />
+        </div>
+      </div>
+      <div class="row" v-if="type === 'open-message'">
         <div>
           <q-btn
             flat
@@ -26,7 +40,7 @@
       <q-separator :dark="darkMode"/>
 
       <!-- Convo -->
-      <q-list ref="scrollTargetRef" :style="`height: ${minHeight - 130}px`" style="overflow: auto;">
+      <q-list ref="scrollTargetRef" :style="`height: ${minHeight - 130}px`" style="overflow: auto;" >
         <q-infinite-scroll
           ref="infiniteScroll"
           :items="convo"
@@ -39,35 +53,37 @@
             <q-spinner-dots color="primary" size="40px" />
           </div>
         </template>
-        <div v-for="(message, index) in convo.messages" :key="index">
-          <q-item>
-            <q-item-section>
-              <div class="q-px-md row justify-center">
-                <div style="width: 100%; max-width: 400px">
-                  <q-chat-message
-                    :name="message.owner ? 'me' : message.sender.name"
-                    :avatar="`https://ui-avatars.com/api/?background=random&name=${message.owner ? chatInfo.sentFrom.name : message.sender.name}&color=fffff`"
-                    :stamp="message.stamp"
-                    :sent="message.owner"
-                    :bg-color="message.owner ? 'blue-5' : 'grey-3'"
-                    :text-color="message.owner ? 'white' : 'black'"
-                    size="6"
-                  >
-                    <div>
-                      {{ message.text }}
-                    </div>
-                  </q-chat-message>
+        <div v-if="chatInfo.length !== 0">
+          <div v-for="(message, index) in convo.messages" :key="index" class="q-pt-xs">
+            <q-item>
+              <q-item-section>
+                <div class="q-px-md row justify-center">
+                  <div style="width: 100%; max-width: 400px">
+                    <q-chat-message
+                      :name="message.owner ? 'me' :  chatInfo.sentFrom.name"
+                      :avatar="`https://ui-avatars.com/api/?background=random&name=${message.owner ? owner.name : chatInfo.sentFrom.name }&color=fffff`"
+                      :stamp="message.stamp"
+                      :sent="message.owner"
+                      :bg-color="message.owner ? 'blue-5' : 'grey-3'"
+                      :text-color="message.owner ? 'white' : 'black'"
+                      size="6"
+                    >
+                      <div>
+                        {{ message.text }}
+                      </div>
+                    </q-chat-message>
+                  </div>
                 </div>
-              </div>
-            </q-item-section>
-          </q-item>
+              </q-item-section>
+            </q-item>
+          </div>
         </div>
         <div v-if="message" class="q-px-sm q-mx-lg">
           <div style="width: 100%; max-width: 400px;">
             <q-chat-message
               name="me"
               sent
-              :avatar="`https://ui-avatars.com/api/?background=random&name=${chatInfo.sentFrom.name}&color=fffff`"
+              :avatar="`https://ui-avatars.com/api/?background=random&name=${owner.name}&color=fffff`"
               bg-color="blue-5"
             >
               <q-spinner-dots size="2rem" />
@@ -133,6 +149,7 @@
 <script>
 import { ref } from 'vue'
 import { debounce } from 'quasar'
+import { thirdparty } from 'ethereumjs-wallet'
 
 export default {
   setup () {
@@ -145,13 +162,16 @@ export default {
     return {
       darkMode: this.$store.getters['darkmode/getStatus'],
       minHeight: this.$q.platform.is.ios ? this.$q.screen.height - (95 + 130) : this.$q.screen.height - (70 + 110),
-      chatInfo: null,
+      owner: { id: 1, name: 'Nikki' },
+      receiver: '',
+      chatDetails: {},
+      chatInfo: [],
       convo: {
         chat_id: 1,
         messages: [
           {
             id: 1,
-            sender: { id: 1, name: 'Leia' },
+            sender: { id: 1, name: 'Nikki' },
             text: 'Hey there!',
             stamp: '3 hours ago',
             owner: true
@@ -165,14 +185,14 @@ export default {
           },
           {
             id: 3,
-            sender: { id: 1, name: 'Leia' },
+            sender: { id: 1, name: 'Nikki' },
             text: 'Great!',
             stamp: '2 hours ago',
             owner: true
           },
           {
             id: 4,
-            sender: { id: 1, name: 'Leia' },
+            sender: { id: 1, name: 'Nikki' },
             text: 'You?',
             stamp: '2 hours ago',
             owner: true
@@ -196,6 +216,10 @@ export default {
       type: Object,
       default: null
     },
+    type: {
+      type: String,
+      default: 'existing'
+    },
     chatId: Number
   },
   emits: ['back'],
@@ -217,7 +241,9 @@ export default {
   },
   async mounted () {
     console.log('chat messages')
-    this.chatInfo = this.chatData
+    if (this.chatData) {
+      this.chatInfo = this.chatData
+    }
 
     this.isloaded = true
     console.log(this.chatInfo)

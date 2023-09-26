@@ -25,9 +25,11 @@
           </div>
 
           <div class="col-2">
-            <q-icon size="sm" name='sym_o_create'/>
+            <q-icon v-show="state !== 'appeal'" size="sm" name='sym_o_create' @click="$emit('openMessage', { info: null, type: 'compose' })" />
           </div>
         </div>
+
+        <!-- <q-separator :dark="darkMode"  class="q-mb-sm" /> -->
 
         <!-- Message List -->
         <div>
@@ -40,9 +42,11 @@
             </div>
           </div>
           <div v-else>
-            <q-list :style="`max-height: ${minHeight - 50}px`" style="overflow:auto;">
+            <!-- CHATS -->
+            <q-list :style="`max-height: ${minHeight - 50}px`" style="overflow:auto;" v-if="state === 'chats'">
               <div v-for="(chat, index) in chats" :key="index">
-                  <q-item clickable @click="$emit('openMessage', chat)">
+                <q-slide-item style="width: 100%;" @left="''" @right="''" right-color="red-6">
+                  <q-item clickable @click="$emit('openMessage', { info: chat, type: 'open-message'})">
                     <q-item-section>
                       <div class="row q-px-lg">
                         <div>
@@ -69,8 +73,40 @@
                       <q-separator :dark="darkMode" class="q-mt-sm q-mx-md"/>
                     </q-item-section>
                   </q-item>
+
+                  <template v-slot:right>
+                    <span class="text-white">Delete</span>
+                    <q-icon name="delete" />
+                  </template>
+                </q-slide-item>
+              </div>
+            </q-list>
+
+            <!-- APPEAL -->
+            <q-list v-if="state === 'appeal'">
+              <div v-for="i in 5" :key="i">
+                <div class="q-px-lg">
+                  <div class="q-pt-md q-px-md">
+                    <q-badge rounded dense :color="i%2 === 0 ? 'red-6' : 'blue-6'" :label="i%2 === 0 ? 'Release' : 'Refund'" />
+                    <div class="q-pt-xs" style="font-weight: 500;">
+                      Order #001{{ i }}
+                    </div>
+                    <div style="font-size: 12px;" class="text-grey-7">
+                      <span style="font-size: 13px;">
+                        Hi there!
+                      </span>
+                      &nbsp;<q-icon size=".5em" name='circle'/>&nbsp;
+                      <span>
+                        {{ i*5 }} min ago
+                      </span>
+                    </div>
+
+                    <q-badge outline rounded dense color="blue-grey-5" label="Fiat Ramp" />
+                  </div>
+                  <q-separator :dark="darkMode" class="q-mt-sm q-mx-sm"/>
                 </div>
-                </q-list>
+              </div>
+            </q-list>
             <!-- <q-list> -->
               <!-- <div  class="q-pt-md q-mx-lg q-px-md">
                 <div class="q-mx-sm" style="font-size: 15px; font-weight: 500;">
