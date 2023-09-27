@@ -40,58 +40,60 @@
       <q-separator :dark="darkMode"/>
 
       <!-- Convo -->
-      <q-list ref="scrollTargetRef" :style="`height: ${minHeight - 130}px`" style="overflow: auto;" >
-        <q-infinite-scroll
-          ref="infiniteScroll"
-          :items="convo"
-          :offset="0"
-          :scroll-target="scrollTargetRef"
-          reverse
-        >
-        <template v-slot:loading>
-          <div class="row justify-center q-my-md" v-if="!isloaded">
-            <q-spinner-dots color="primary" size="40px" />
-          </div>
-        </template>
-        <div v-if="chatInfo.length !== 0">
-          <div v-for="(message, index) in convo.messages" :key="index" class="q-pt-xs">
-            <q-item>
-              <q-item-section>
-                <div class="q-px-md row justify-center">
-                  <div style="width: 100%; max-width: 400px">
-                    <q-chat-message
-                      :name="message.owner ? 'me' :  chatInfo.sentFrom.name"
-                      :avatar="`https://ui-avatars.com/api/?background=random&name=${message.owner ? owner.name : chatInfo.sentFrom.name }&color=fffff`"
-                      :stamp="message.stamp"
-                      :sent="message.owner"
-                      :bg-color="message.owner ? 'blue-5' : 'grey-3'"
-                      :text-color="message.owner ? 'white' : 'black'"
-                      size="6"
-                    >
-                      <div>
-                        {{ message.text }}
-                      </div>
-                    </q-chat-message>
+      <q-pull-to-refresh @refresh="refreshData">
+        <q-list ref="scrollTargetRef" :style="`height: ${minHeight - 130}px`" style="overflow: auto;" >
+          <q-infinite-scroll
+            ref="infiniteScroll"
+            :items="convo"
+            :offset="0"
+            :scroll-target="scrollTargetRef"
+            reverse
+          >
+          <template v-slot:loading>
+            <div class="row justify-center q-my-md" v-if="!isloaded">
+              <q-spinner-dots color="primary" size="40px" />
+            </div>
+          </template>
+          <div v-if="chatInfo.length !== 0">
+            <div v-for="(message, index) in convo.messages" :key="index" class="q-pt-xs">
+              <q-item>
+                <q-item-section>
+                  <div class="q-px-md row justify-center">
+                    <div style="width: 100%; max-width: 400px">
+                      <q-chat-message
+                        :name="message.owner ? 'me' :  chatInfo.sentFrom.name"
+                        :avatar="`https://ui-avatars.com/api/?background=random&name=${message.owner ? owner.name : chatInfo.sentFrom.name }&color=fffff`"
+                        :stamp="message.stamp"
+                        :sent="message.owner"
+                        :bg-color="message.owner ? 'blue-5' : 'blue-grey-3'"
+                        :text-color="message.owner ? 'white' : 'black'"
+                        size="6"
+                      >
+                        <div style="font-size: 13px; font-weight: 400;">
+                          {{ message.text }}
+                        </div>
+                      </q-chat-message>
+                    </div>
                   </div>
-                </div>
-              </q-item-section>
-            </q-item>
+                </q-item-section>
+              </q-item>
+            </div>
           </div>
-        </div>
-        <div v-if="message" class="q-px-sm q-mx-lg">
-          <div style="width: 100%; max-width: 400px;">
-            <q-chat-message
-              name="me"
-              sent
-              :avatar="`https://ui-avatars.com/api/?background=random&name=${owner.name}&color=fffff`"
-              bg-color="blue-5"
-            >
-              <q-spinner-dots size="2rem" />
-            </q-chat-message>
+          <div v-if="message" class="q-px-sm q-mx-lg">
+            <div style="width: 100%; max-width: 400px;">
+              <q-chat-message
+                name="me"
+                sent
+                :avatar="`https://ui-avatars.com/api/?background=random&name=${owner.name}&color=fffff`"
+                bg-color="blue-5"
+              >
+                <q-spinner-dots color="white" size="2rem" />
+              </q-chat-message>
+            </div>
           </div>
-        </div>
-        </q-infinite-scroll>
-      </q-list>
+          </q-infinite-scroll>
+        </q-list>
+      </q-pull-to-refresh>
 
       <!-- <div class="q-mt-sm" :style="`height: ${minHeight - 130}px`">
         <div class="q-pa-md row justify-center">
@@ -131,6 +133,7 @@
       <div class="row q-pt-xs q-px-sm">
         <q-input
           class="col q-px-sm"
+          :dark="darkMode"
           rounded
           outlined
           dense
@@ -237,6 +240,12 @@ export default {
     sendMessage () {
       console.log('sending message')
       this.message = ''
+    },
+    refreshData (done) {
+      console.log('refreshing data')
+      setTimeout(() => {
+        done()
+      }, 1000)
     }
   },
   async mounted () {

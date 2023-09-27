@@ -2,7 +2,7 @@
   <div class="q-px-md">
     <!-- Search -->
     <div class="text-center q-pt-lg q-px-lg">
-      <q-input bottom-slots v-model="search" placeholder="Search..." dense rounded outlined>
+      <q-input bottom-slots v-model="search" placeholder="Search..." dense rounded outlined :dark="darkMode">
         <template v-slot:append>
           <q-icon name="search" />
         </template>
@@ -43,70 +43,75 @@
           </div>
           <div v-else>
             <!-- CHATS -->
-            <q-list :style="`max-height: ${minHeight - 50}px`" style="overflow:auto;" v-if="state === 'chats'">
-              <div v-for="(chat, index) in chats" :key="index">
-                <q-slide-item style="width: 100%;" @left="''" @right="''" right-color="red-6">
-                  <q-item clickable @click="$emit('openMessage', { info: chat, type: 'open-message'})">
-                    <q-item-section>
-                      <div class="row q-px-lg">
-                        <div>
-                          <q-avatar size="md" style="padding-top: 13px;">
-                            <q-img style="filter: grayscale(30%);" loading="lazy" spinner-color="white"  :src="`https://ui-avatars.com/api/?background=random&name=${chat.sentFrom.name}&color=fffff`" />
-                          </q-avatar>
-                        </div>
-                        <div  class="q-pt-sm q-mr-md q-pl-xs">
-                          <div class="q-mx-sm" style="font-size: 15px; font-weight: 500;">
-                            {{ chat.sentFrom.name }}
+            <q-pull-to-refresh @refresh="refreshData">
+              <q-list :style="`max-height: ${minHeight - 50}px`" style="overflow:auto;" v-if="state === 'chats'">
+                <div v-for="(chat, index) in chats" :key="index">
+                  <q-slide-item style="width: 100%;" @left="''" @right="''" right-color="red-6">
+                    <q-item clickable @click="$emit('openMessage', { info: chat, type: 'open-message'})" :class="darkMode ? 'pt-dark-card-2 text-white' : ''">
+                      <q-item-section>
+                        <div class="row q-px-lg" >
+                          <div>
+                            <q-avatar size="md" style="padding-top: 13px;">
+                              <q-img style="filter: grayscale(30%);" loading="lazy" spinner-color="white"  :src="`https://ui-avatars.com/api/?background=random&name=${chat.sentFrom.name}&color=fffff`" />
+                            </q-avatar>
                           </div>
-                          <div style="font-size: 12px;" class="text-grey-7 q-px-sm">
-                            <span style="font-size: 13px;">
-                              You: {{ chat.text }}
-                            </span>
-                            &nbsp;<q-icon size=".5em" name='circle'/>&nbsp;
-                            <span>
-                              {{ chat.date }}
-                            </span>
+                          <div  class="q-pt-sm q-mr-md q-pl-xs">
+                            <div class="q-mx-sm" style="font-size: 15px; font-weight: 500;">
+                              {{ chat.sentFrom.name }}
+                            </div>
+                            <div style="font-size: 12px;" class="q-px-sm" :class="darkMode ? 'text-grey-5' : 'text-grey-7'">
+                              <span style="font-size: 13px;">
+                                You: {{ chat.text }}
+                              </span>
+                              &nbsp;<q-icon size=".5em" name='circle'/>&nbsp;
+                              <span>
+                                {{ chat.date }}
+                              </span>
+                            </div>
+
                           </div>
-
                         </div>
-                      </div>
-                      <q-separator :dark="darkMode" class="q-mt-sm q-mx-md"/>
-                    </q-item-section>
-                  </q-item>
+                        <q-separator :dark="darkMode" class="q-mt-sm q-mx-md"/>
+                      </q-item-section>
+                    </q-item>
 
-                  <template v-slot:right>
-                    <span class="text-white">Delete</span>
-                    <q-icon name="delete" />
-                  </template>
-                </q-slide-item>
-              </div>
-            </q-list>
+                    <template v-slot:right>
+                      <span class="text-white">Delete</span>
+                      <q-icon name="delete" />
+                    </template>
+                  </q-slide-item>
+                </div>
+              </q-list>
+            </q-pull-to-refresh>
 
             <!-- APPEAL -->
-            <q-list v-if="state === 'appeal'">
-              <div v-for="i in 5" :key="i">
-                <div class="q-px-lg">
-                  <div class="q-pt-md q-px-md">
-                    <q-badge rounded dense :color="i%2 === 0 ? 'red-6' : 'blue-6'" :label="i%2 === 0 ? 'Release' : 'Refund'" />
-                    <div class="q-pt-xs" style="font-weight: 500;">
-                      Order #001{{ i }}
-                    </div>
-                    <div style="font-size: 12px;" class="text-grey-7">
-                      <span style="font-size: 13px;">
-                        Hi there!
-                      </span>
-                      &nbsp;<q-icon size=".5em" name='circle'/>&nbsp;
-                      <span>
-                        {{ i*5 }} min ago
-                      </span>
-                    </div>
+            <q-pull-to-refresh @refresh="refreshData">
+              <q-list v-if="state === 'appeal'">
+                <div v-for="i in 5" :key="i">
+                  <div class="q-px-lg">
+                    <div class="q-pt-md q-px-md">
+                      <q-badge rounded dense :color="i%2 === 0 ? 'red-6' : 'blue-6'" :label="i%2 === 0 ? 'Release' : 'Refund'" />
+                      <div class="q-pt-xs" style="font-weight: 500;">
+                        Order #001{{ i }}
+                      </div>
+                      <div style="font-size: 12px;" :class="darkMode ? 'text-grey-5' : 'text-grey-7'">
+                        <span style="font-size: 13px;">
+                          Hi there!
+                        </span>
+                        &nbsp;<q-icon size=".5em" name='circle'/>&nbsp;
+                        <span>
+                          {{ i*5 }} min ago
+                        </span>
+                      </div>
 
-                    <q-badge outline rounded dense color="blue-grey-5" label="Fiat Ramp" />
+                      <q-badge outline rounded dense :color="darkMode ? 'blue-grey-3' : 'blue-grey-5'" label="Fiat Ramp" />
+                    </div>
+                    <q-separator :dark="darkMode" class="q-mt-sm q-mx-sm"/>
                   </div>
-                  <q-separator :dark="darkMode" class="q-mt-sm q-mx-sm"/>
                 </div>
-              </div>
-            </q-list>
+              </q-list>
+            </q-pull-to-refresh>
+
             <!-- <q-list> -->
               <!-- <div  class="q-pt-md q-mx-lg q-px-md">
                 <div class="q-mx-sm" style="font-size: 15px; font-weight: 500;">
@@ -178,6 +183,14 @@ export default {
   emits: ['openMessage'],
   async mounted () {
     console.log('chat body')
+  },
+  methods: {
+    refreshData (done) {
+      console.log('refreshing data')
+      setTimeout(() => {
+        done()
+      }, 1000)
+    }
   }
 }
 </script>
