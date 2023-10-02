@@ -7,7 +7,24 @@
     >
     <div v-if="isloaded">
       <div v-if="type === 'compose'">
-        <div class="row">
+        <div class="row q-py-xs q-px-md">
+          <q-icon class="q-pt-sm" color="grey-7" size="sm" name='arrow_back' @click="$emit('back')"/>&nbsp;
+          <q-input
+            class="col q-px-sm"
+            :dark="darkMode"
+            rounded
+            dense
+            v-model="receiver"
+            placeholder="Enter address..."
+            borderless
+            >
+            <template v-slot:append>
+              <q-icon name="close" @click="receiver = ''"/>&nbsp;
+              <q-icon name="mdi-qrcode-scan"/>
+            </template>
+          </q-input>
+        </div>
+        <!-- <div class="row">
           <q-btn
             flat
             padding="md"
@@ -15,10 +32,14 @@
             @click="$emit('back')"
           />
           <div style="padding-top: 18px;">
-            To:
           </div>&nbsp;&nbsp;
-          <q-input class="q-pt-sm" v-model="receiver" borderless dense />
-        </div>
+          <q-input class="q-pt-sm" v-model="receiver" borderless dense placeholder="Enter address">
+            <template v-slot:append>
+              <q-icon name="close" @click="receiver = ''"/>&nbsp;
+              <q-icon name="mdi-qrcode-scan"/>
+            </template>
+          </q-input>
+        </div> -->
       </div>
       <div class="row" v-if="type === 'open-message'">
         <div>
@@ -59,7 +80,7 @@
               <q-item>
                 <q-item-section>
                   <div class="q-px-md row justify-center">
-                    <div style="width: 100%; max-width: 400px">
+                    <div style="width: 100%;">
                       <q-chat-message
                         :name="message.owner ? 'me' :  chatInfo.sentFrom.name"
                         :avatar="`https://ui-avatars.com/api/?background=random&name=${message.owner ? owner.name : chatInfo.sentFrom.name }&color=fffff`"
@@ -79,8 +100,25 @@
               </q-item>
             </div>
           </div>
+          <div v-else>
+            <div v-if="type === 'compose'" class="col-12 q-mt-lg text-center" style="padding-top: 40%;">
+              <div>
+                <div class="q-pb-sm text-grey-5" style="font-size: 18px;">
+                  Scan Address
+                </div>
+                <q-btn round size="lg" class="btn-scan text-white" icon="mdi-qrcode" @click.once="showQrScanner = true" />
+              </div>
+              <!-- <div class="stack-top">
+                Helllo
+              </div> -->
+            </div>
+            <div v-else class="text-center">
+              <q-icon name="sym_o_comments_disabled"/>
+              No Existing Conversation
+            </div>
+          </div>
           <div v-if="message" class="q-px-sm q-mx-lg">
-            <div style="width: 100%; max-width: 400px;">
+            <div style="width: 100%;">
               <q-chat-message
                 name="me"
                 sent
@@ -265,4 +303,12 @@ export default {
   height: 2em;
   width: 2em;
 }
+.btn-scan {
+    background-image: linear-gradient(to right bottom, #3b7bf6, #a866db, #da53b2, #ef4f84, #ed5f59);
+    color: white;
+  }
+  .stack-top{
+    position: relative;
+    z-index: auto;
+  }
 </style>
