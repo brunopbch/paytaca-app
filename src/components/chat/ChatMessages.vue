@@ -100,21 +100,12 @@
               </q-item>
             </div>
           </div>
-          <div v-else>
-            <div v-if="type === 'compose'" class="col-12 q-mt-lg text-center" style="padding-top: 40%;">
-              <div>
-                <div class="q-pb-sm text-grey-5" style="font-size: 18px;">
-                  Scan Address
-                </div>
-                <q-btn round size="lg" class="btn-scan text-white" icon="mdi-qrcode" @click.once="showQrScanner = true" />
+          <div v-else class="text-center" >
+            <div v-if="!message" style="margin-top: 40%;">
+              <q-icon name="sym_o_comments_disabled" size="lg"/>
+              <div class="text-grey-5">
+                No Existing Conversation
               </div>
-              <!-- <div class="stack-top">
-                Helllo
-              </div> -->
-            </div>
-            <div v-else class="text-center">
-              <q-icon name="sym_o_comments_disabled"/>
-              No Existing Conversation
             </div>
           </div>
           <div v-if="message" class="q-px-sm q-mx-lg">

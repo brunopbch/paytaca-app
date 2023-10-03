@@ -44,9 +44,9 @@
           <div v-else>
             <!-- CHATS -->
             <q-pull-to-refresh @refresh="refreshData">
-              <q-list :style="`max-height: ${minHeight - 50}px`" style="overflow:auto;" v-if="state === 'chats'">
+              <q-list :style="`max-height: ${minHeight - 50}px`" style="overflow:auto;" v-if="state === 'chats' || state === 'archive'">
                 <div v-for="(chat, index) in chats" :key="index">
-                  <q-slide-item @left="onLeft" @right="onRight" right-color="red-6" left-color="grey-5" class=" q-mx-lg">
+                  <q-slide-item @left="onLeft" @right="onRight" :right-color="state === 'chats' ? 'red-6' : 'grey-5'" left-color="grey-5" class=" q-mx-lg">
                     <q-item clickable @click="$emit('openMessage', { info: chat, type: 'open-message'})" :class="darkMode ? 'pt-dark-card-2 text-white' : ''">
                       <q-item-section>
                         <div class="row" >
@@ -76,10 +76,16 @@
                     </q-item>
 
                     <template v-slot:right>
-                      <span class="text-white">Delete</span>&nbsp;
-                      <q-icon name="delete" />
+                      <div v-if="state === 'chats'">
+                        <span class="text-white">Delete</span>&nbsp;
+                        <q-icon name="delete" />
+                      </div>
+                      <div v-if="state === 'archive'">
+                        <span class="text-white">Unarchive</span>&nbsp;
+                        <q-icon name="unarchive" />
+                      </div>
                     </template>
-                    <template v-slot:left>
+                    <template v-slot:left v-if="disableLeftSlider">
                       <span class="text-white">Archive</span>&nbsp;
                       <q-icon name="archive" />
                     </template>
@@ -102,30 +108,36 @@
                     </div>
                   </template>
                   <div v-for="i in 7" :key="i">
-                    <div class="q-px-lg">
-                      <div class="q-pt-md q-px-md">
-                        <q-badge rounded dense :color="i%2 === 0 ? 'red-6' : 'blue-6'" :label="i%2 === 0 ? 'Release' : 'Refund'" />
-                        <div class="q-pt-xs" style="font-weight: 500;">
-                          Order #001{{ i }}
-                        </div>
-                        <div style="font-size: 12px;" :class="darkMode ? 'text-grey-5' : 'text-grey-7'">
-                          <span style="font-size: 13px;">
-                            Hi there!
-                          </span>
-                          &nbsp;<q-icon size=".5em" name='circle'/>&nbsp;
-                          <span>
-                            {{ i*5 }} min ago
-                          </span>
-                        </div>
+                    <!-- <q-item clickable @click="''" :class="darkMode ? 'pt-dark-card-2 text-white' : ''"> -->
+                      <div class="q-px-lg" @click="$emit('openMessage', { info: chats[0], type: 'open-message'})">
+                        <div class="q-pt-md q-px-md">
+                          <q-badge rounded dense :color="i%2 === 0 ? 'red-6' : 'blue-6'" :label="i%2 === 0 ? 'Release' : 'Refund'" />
+                          <div class="q-pt-xs" style="font-weight: 500;">
+                            Order #001{{ i }}
+                          </div>
+                          <div style="font-size: 12px;" :class="darkMode ? 'text-grey-5' : 'text-grey-7'">
+                            <span style="font-size: 13px;">
+                              Hi there!
+                            </span>
+                            &nbsp;<q-icon size=".5em" name='circle'/>&nbsp;
+                            <span>
+                              {{ i*5 }} min ago
+                            </span>
+                          </div>
 
-                        <q-badge outline rounded dense :color="darkMode ? 'blue-grey-3' : 'blue-grey-5'" label="Fiat Ramp" />
+                          <q-badge outline rounded dense :color="darkMode ? 'blue-grey-3' : 'blue-grey-5'" label="Fiat Ramp" />
+                        </div>
+                        <q-separator :dark="darkMode" class="q-mt-sm q-mx-sm"/>
                       </div>
-                      <q-separator :dark="darkMode" class="q-mt-sm q-mx-sm"/>
-                    </div>
+                    <!-- </q-item> -->
                   </div>
                 </q-infinite-scroll>
               </q-list>
             </q-pull-to-refresh>
+
+            <!-- <div v-if="state === 'archive'">
+              <div class="text-center">Hello</div>
+           </div> -->
 
             <!-- <q-list> -->
               <!-- <div  class="q-pt-md q-mx-lg q-px-md">
@@ -159,6 +171,12 @@ export default {
     const scrollTargetRef = ref(null)
     return {
       scrollTargetRef
+    }
+  },
+  computed: {
+    disableLeftSlider () {
+      console.log(this.state === 'chats')
+      return this.state === 'chats'
     }
   },
   data () {
