@@ -20,7 +20,8 @@
             >
             <template v-slot:append>
               <q-icon name="close" @click="receiver = ''"/>&nbsp;
-              <q-icon name="mdi-qrcode-scan"/>
+              <q-icon name="mdi-qrcode-scan"/>&nbsp;
+              <q-icon name="send" size="md" color="indigo-6" @click="addSearched(receiver)"/>
             </template>
           </q-input>
         </div>
@@ -63,6 +64,13 @@
       <!-- Convo -->
       <q-pull-to-refresh @refresh="refreshData">
         <q-list ref="scrollTargetRef" :style="`height: ${minHeight - 130}px`" style="overflow: auto;" >
+          <div class="q-pb-xs q-pt-sm q-px-sm"  v-if="searchItem.length !== 0">
+            <div class="q-gutter-xs row truncate-chip-labels">
+              <q-chip v-for="(item, index) in searchItem" :key="index" removable color="blue-6" text-color="white" icon="account_circle" @remove="removeSearched(index)">
+                <span class="customEllipsis">{{ item }}</span>
+              </q-chip>
+            </div>
+          </div>
           <q-infinite-scroll
             ref="infiniteScroll"
             :items="convo"
@@ -196,6 +204,7 @@ export default {
       minHeight: this.$q.platform.is.ios ? this.$q.screen.height - (95 + 130) : this.$q.screen.height - (70 + 110),
       owner: { id: 1, name: 'Nikki' },
       receiver: '',
+      searchItem: [],
       chatDetails: {},
       chatInfo: [],
       convo: {
@@ -275,6 +284,13 @@ export default {
       setTimeout(() => {
         done()
       }, 1000)
+    },
+    addSearched (name) {
+      this.searchItem.push(name)
+      this.receiver = ''
+    },
+    removeSearched (index) {
+      this.searchItem.splice(index, 1)
     }
   },
   async mounted () {
@@ -302,4 +318,12 @@ export default {
     position: relative;
     z-index: auto;
   }
+.q-chip {
+    max-width: 100px
+  }
+  .customEllipsis {
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+}
 </style>
