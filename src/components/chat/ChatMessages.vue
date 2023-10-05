@@ -10,13 +10,19 @@
         <div class="row q-py-xs q-px-md">
           <q-icon class="q-pt-sm" color="grey-7" size="sm" name='arrow_back' @click="$emit('back')"/>&nbsp;
           <q-input
+            ref="addrRef"
             class="col q-px-sm"
             :dark="darkMode"
             rounded
             dense
             v-model="receiver"
             placeholder="Enter address..."
+            :rules="[val => isValidAddress || '' ]"
             borderless
+            hide-bottom-space
+            @update:model-value="function() {
+              validateAddress()
+            }"
             >
             <template v-slot:append>
               <q-icon name="close" @click="receiver = ''"/>&nbsp;
@@ -190,12 +196,20 @@
 import { ref } from 'vue'
 import { debounce } from 'quasar'
 import { thirdparty } from 'ethereumjs-wallet'
+import { Address } from '../../wallet'
+import { isValidTokenAddress } from 'src/wallet/chipnet'
 
 export default {
   setup () {
     const scrollTargetRef = ref(null)
+    const addrRef = ref(null)
     return {
-      scrollTargetRef
+      scrollTargetRef,
+      addrRef,
+
+      reset () {
+        addrRef.value.resetValidation()
+      }
     }
   },
   data () {
@@ -249,7 +263,8 @@ export default {
       },
       isloaded: false,
       isTyping: false,
-      message: ''
+      message: '',
+      isValidAddress: false
     }
   },
   props: {
@@ -285,13 +300,93 @@ export default {
         done()
       }, 1000)
     },
-    addSearched (name) {
-      this.searchItem.push(name)
+    addSearched (address) {
+      console.log(this.validateAddress(address))
+      this.searchItem.push(address)
       this.receiver = ''
     },
     removeSearched (index) {
       this.searchItem.splice(index, 1)
-    }
+    },
+    validateAddress: debounce(async function () {
+      console.log('validating')
+
+      const vm = this
+      vm.reset()
+      const address = this.receiver
+      const addressObj = new Address(address)
+      let addressIsValid = false
+      let formattedAddress
+
+      try {
+        if (isValidTokenAddress(address)) {
+          addressIsValid = true
+          formattedAddress = address
+        } else if (addressObj.isLegacyAddress() || addressObj.isCashAddress()) {
+          console.log('hello')
+          if (addressObj.isValidBCHAddress(true)) { //isChipnet
+            addressIsValid = true
+            formattedAddress = addressObj.toCashAddress(address)
+          }
+        }
+      } catch (err) {
+        addressIsValid = false
+        console.log(err)
+      }
+
+      this.isValidAddress = addressIsValid
+      // return {
+      //   valid: addressIsValid,
+      //   address: formattedAddress
+      // }
+    }, 500),
+    test() {
+      const vm = this
+      let addressObj = new Address(address)
+      let addressIsValid = false
+      let formattedAddress
+
+      try {
+        // if (vm.walletType === sBCHWalletType) {
+        //   if (addressObj.isSep20Address()) {
+        //     addressIsValid = true
+        //   }
+        //   if (addressIsValid) {
+        //     formattedAddress = addressObj.address
+        //   }
+        // }
+        // if (vm.walletType === 'bch') {
+        // if (vm.isCashToken) {
+        //   addressIsValid = isValidTokenAddress(address)
+        //   formattedAddress = address
+        // } else {
+        if (isValidTokenAddress(address)) {
+          addressIsValid = true
+          formattedAddress = address
+        } else if (addressObj.isLegacyAddress() || addressObj.isCashAddress()) {
+          console.log('hello')
+          if (addressObj.isValidBCHAddress(true)) { //isChipnet
+            addressIsValid = true
+            formattedAddress = addressObj.toCashAddress(address)
+          }
+        }
+        // }
+        // }
+        // if (vm.walletType === 'slp') {
+        //   if (addressObj.isSLPAddress() && addressObj.isMainnetSLPAddress()) {
+        //     addressIsValid = true
+        //     formattedAddress = addressObj.toSLPAddress(address)
+        //   }
+        // }
+      } catch (err) {
+        addressIsValid = false
+        console.log(err)
+      }
+      return {
+        valid: addressIsValid,
+        address: formattedAddress
+      }
+    },
   },
   async mounted () {
     console.log('chat messages')
@@ -319,7 +414,7 @@ export default {
     z-index: auto;
   }
 .q-chip {
-    max-width: 100px
+    max-width: 150px
   }
   .customEllipsis {
   text-overflow: ellipsis !important;
