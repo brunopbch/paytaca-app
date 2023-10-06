@@ -17,36 +17,22 @@
             dense
             v-model="receiver"
             placeholder="Enter address..."
-            :rules="[val => isValidAddress || '' ]"
+
             borderless
             hide-bottom-space
             @update:model-value="function() {
-              validateAddress()
+              isValidAddress = true
+              reset()
             }"
             >
             <template v-slot:append>
+              <q-icon name="error" color="red-10" v-if="!isValidAddress && receiver !== ''"/>
               <q-icon name="close" @click="receiver = ''"/>&nbsp;
               <q-icon name="mdi-qrcode-scan"/>&nbsp;
-              <q-icon name="send" size="md" color="indigo-6" @click="addSearched(receiver)"/>
+              <q-icon name="send" size="md" color="indigo-6" @click.prevent="addSearched()"/>
             </template>
           </q-input>
         </div>
-        <!-- <div class="row">
-          <q-btn
-            flat
-            padding="md"
-            icon="arrow_back"
-            @click="$emit('back')"
-          />
-          <div style="padding-top: 18px;">
-          </div>&nbsp;&nbsp;
-          <q-input class="q-pt-sm" v-model="receiver" borderless dense placeholder="Enter address">
-            <template v-slot:append>
-              <q-icon name="close" @click="receiver = ''"/>&nbsp;
-              <q-icon name="mdi-qrcode-scan"/>
-            </template>
-          </q-input>
-        </div> -->
       </div>
       <div class="row" v-if="type === 'open-message'">
         <div>
@@ -102,7 +88,7 @@
                         :sent="message.owner"
                         :bg-color="message.owner ? 'blue-5' : 'blue-grey-3'"
                         :text-color="message.owner ? 'white' : 'black'"
-                        size="6"
+
                       >
                         <div style="font-size: 13px; font-weight: 400;">
                           {{ message.text }}
@@ -137,39 +123,6 @@
           </q-infinite-scroll>
         </q-list>
       </q-pull-to-refresh>
-
-      <!-- <div class="q-mt-sm" :style="`height: ${minHeight - 130}px`">
-        <div class="q-pa-md row justify-center">
-          <div style="width: 100%; max-width: 400px">
-            <q-chat-message
-              name="me"
-              avatar="https://cdn.quasar.dev/img/avatar3.jpg"
-              stamp="7 minutes ago"
-              sent
-              text-color="white"
-              bg-color="primary"
-            >
-              <div>
-                Hey there!
-              </div>
-
-              <div>
-                Have you seen Quasar?
-                <img src="https://cdn.quasar.dev/img/discord-omq.png" class="my-emoticon">
-              </div>
-            </q-chat-message>
-
-            <q-chat-message
-              name="Jane"
-              avatar="https://cdn.quasar.dev/img/avatar5.jpg"
-              bg-color="amber"
-            >
-              <q-spinner-dots size="2rem" />
-            </q-chat-message>
-          </div>
-        </div>
-      </div> -->
-
 
       <q-separator :dark="darkMode"  class="q-mb-sm"/>
       <!-- Message Input -->
@@ -209,6 +162,9 @@ export default {
 
       reset () {
         addrRef.value.resetValidation()
+      },
+      blur () {
+        addrRef.value.blur()
       }
     }
   },
@@ -300,19 +256,26 @@ export default {
         done()
       }, 1000)
     },
-    addSearched (address) {
-      console.log(this.validateAddress(address))
-      this.searchItem.push(address)
-      this.receiver = ''
+    async addSearched () {
+      await this.validateAddress()
+      console.log('valid: ', this.isValidAddress)
+
+      if (this.isValidAddress) {
+        this.searchItem.push(this.receiver)
+        this.receiver = ''
+      } else {
+        console.log('not valid')
+      }
+      this.blur()
     },
     removeSearched (index) {
       this.searchItem.splice(index, 1)
     },
-    validateAddress: debounce(async function () {
+    validateAddress () {
       console.log('validating')
 
       const vm = this
-      vm.reset()
+      // vm.reset()
       const address = this.receiver
       const addressObj = new Address(address)
       let addressIsValid = false
@@ -335,11 +298,39 @@ export default {
       }
 
       this.isValidAddress = addressIsValid
+    },
+    // validateAddress: debounce(async function () {
+    //   console.log('validating')
+
+    //   const vm = this
+    //   // vm.reset()
+    //   const address = this.receiver
+    //   const addressObj = new Address(address)
+    //   let addressIsValid = false
+    //   let formattedAddress
+
+    //   try {
+    //     if (isValidTokenAddress(address)) {
+    //       addressIsValid = true
+    //       formattedAddress = address
+    //     } else if (addressObj.isLegacyAddress() || addressObj.isCashAddress()) {
+    //       console.log('hello')
+    //       if (addressObj.isValidBCHAddress(true)) { //isChipnet
+    //         addressIsValid = true
+    //         formattedAddress = addressObj.toCashAddress(address)
+    //       }
+    //     }
+    //   } catch (err) {
+    //     addressIsValid = false
+    //     console.log(err)
+    //   }
+
+    //   this.isValidAddress = addressIsValid
       // return {
       //   valid: addressIsValid,
       //   address: formattedAddress
       // }
-    }, 500),
+    // }, 500),
     test() {
       const vm = this
       let addressObj = new Address(address)

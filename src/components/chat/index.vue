@@ -124,7 +124,6 @@
                               {{ i*5 }} min ago
                             </span>
                           </div>
-
                           <q-badge outline rounded dense :color="darkMode ? 'blue-grey-3' : 'blue-grey-5'" label="Fiat Ramp" />
                         </div>
                         <q-separator :dark="darkMode" class="q-mt-sm q-mx-sm"/>
@@ -134,10 +133,6 @@
                 </q-infinite-scroll>
               </q-list>
             </q-pull-to-refresh>
-
-            <!-- <div v-if="state === 'archive'">
-              <div class="text-center">Hello</div>
-           </div> -->
 
             <!-- <q-list> -->
               <!-- <div  class="q-pt-md q-mx-lg q-px-md">
