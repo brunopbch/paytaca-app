@@ -56,6 +56,9 @@
       <!-- Convo -->
       <q-pull-to-refresh @refresh="refreshData">
         <q-list ref="scrollTargetRef" :style="`height: ${minHeight - 130}px`" style="overflow: auto;" >
+          <div class="text-center text-red-10 q-pt-sm" v-if="!isValidAddress && receiver !== ''">
+            Invalid Address! Try Again
+          </div>
           <div class="q-pb-xs q-pt-sm q-px-sm"  v-if="searchItem.length !== 0">
             <div class="q-gutter-xs row truncate-chip-labels">
               <q-chip v-for="(item, index) in searchItem" :key="index" removable color="blue-6" text-color="white" icon="account_circle" @remove="removeSearched(index)">
@@ -88,7 +91,6 @@
                         :sent="message.owner"
                         :bg-color="message.owner ? 'blue-5' : 'blue-grey-3'"
                         :text-color="message.owner ? 'white' : 'black'"
-
                       >
                         <div style="font-size: 13px; font-weight: 400;">
                           {{ message.text }}
@@ -272,11 +274,9 @@ export default {
       this.searchItem.splice(index, 1)
     },
     validateAddress () {
-      console.log('validating')
-
       const vm = this
       // vm.reset()
-      const address = this.receiver
+      const address = vm.receiver
       const addressObj = new Address(address)
       let addressIsValid = false
       let formattedAddress
@@ -286,7 +286,6 @@ export default {
           addressIsValid = true
           formattedAddress = address
         } else if (addressObj.isLegacyAddress() || addressObj.isCashAddress()) {
-          console.log('hello')
           if (addressObj.isValidBCHAddress(true)) { //isChipnet
             addressIsValid = true
             formattedAddress = addressObj.toCashAddress(address)
@@ -331,56 +330,8 @@ export default {
       //   address: formattedAddress
       // }
     // }, 500),
-    test() {
-      const vm = this
-      let addressObj = new Address(address)
-      let addressIsValid = false
-      let formattedAddress
-
-      try {
-        // if (vm.walletType === sBCHWalletType) {
-        //   if (addressObj.isSep20Address()) {
-        //     addressIsValid = true
-        //   }
-        //   if (addressIsValid) {
-        //     formattedAddress = addressObj.address
-        //   }
-        // }
-        // if (vm.walletType === 'bch') {
-        // if (vm.isCashToken) {
-        //   addressIsValid = isValidTokenAddress(address)
-        //   formattedAddress = address
-        // } else {
-        if (isValidTokenAddress(address)) {
-          addressIsValid = true
-          formattedAddress = address
-        } else if (addressObj.isLegacyAddress() || addressObj.isCashAddress()) {
-          console.log('hello')
-          if (addressObj.isValidBCHAddress(true)) { //isChipnet
-            addressIsValid = true
-            formattedAddress = addressObj.toCashAddress(address)
-          }
-        }
-        // }
-        // }
-        // if (vm.walletType === 'slp') {
-        //   if (addressObj.isSLPAddress() && addressObj.isMainnetSLPAddress()) {
-        //     addressIsValid = true
-        //     formattedAddress = addressObj.toSLPAddress(address)
-        //   }
-        // }
-      } catch (err) {
-        addressIsValid = false
-        console.log(err)
-      }
-      return {
-        valid: addressIsValid,
-        address: formattedAddress
-      }
-    },
   },
   async mounted () {
-    console.log('chat messages')
     if (this.chatData) {
       this.chatInfo = this.chatData
     }

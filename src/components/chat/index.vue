@@ -170,7 +170,6 @@ export default {
   },
   computed: {
     disableLeftSlider () {
-      console.log(this.state === 'chats')
       return this.state === 'chats'
     }
   },
