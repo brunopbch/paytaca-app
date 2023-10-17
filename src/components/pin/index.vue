@@ -102,7 +102,7 @@ const { SecureStoragePlugin } = Plugins
 export default {
   /**
    * Note: quasar upgrade from v1 to v2 requires 'pinDialogAction' prop to be used with v-model instead of v-bind
-   * 
+   *
    *
    * Before:
    *  <pinDialog :pin-dialog-action="pinDialogAction" v-on:nextAction="pinDialogNextAction" />
