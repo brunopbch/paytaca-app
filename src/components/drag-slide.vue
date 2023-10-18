@@ -23,10 +23,6 @@
     </div>
     <pinDialog v-model:pin-dialog-action="pinDialogAction" v-on:nextAction="sendResponse" />
   </q-list>
-  <!-- <div v-if="step === 2">
-    Pin Here
-  </div> -->
-  <!-- <pin1Dialog v-model:pin-dialog-action="pinDialogAction" v-on:nextAction="sendTransaction" /> -->
 </template>
 <script>
 import { addressContentsToLockingBytecode } from '@bitauth/libauth'
@@ -73,25 +69,7 @@ export default {
         this.pinDialogAction = ''
         this.swiped = false
       }
-    },
-    executeSecurityChecking () {
-      const vm = this
-      SecureStoragePlugin.get({ key: 'pin' })
-        .then(() => {
-          setTimeout(() => {
-            if (vm.$q.localStorage.getItem('preferredSecurity') === 'pin') {
-              vm.pinDialogAction = 'VERIFY'
-            } else {
-              vm.verifyBiometric()
-            }
-          }, 500)
-        })
-        .catch(() => {
-          setTimeout(() => {
-            vm.verifyBiometric()
-          }, 500)
-        })
-    },
+    }
   },
   async mounted () {
     const vm = this
