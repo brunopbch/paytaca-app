@@ -47,8 +47,8 @@ export default {
   methods: {
     selectMenu (item) {
       console.log(item)
-      this.state = item
       this.openMessage = false
+      this.state = item
     },
     openChat (item) {
       console.log('opening message')

@@ -1,4 +1,8 @@
 <template>
+  <QrScanner
+    v-if="showQrScanner"
+    v-model="showQrScanner"
+    @decode="onScannerDecode"/>
   <div class="q-pt-lg q-mx-xs">
     <q-card
       class="br-15 q-pt-sm q-mx-md q-mx-none q-mb-lg"
@@ -28,7 +32,7 @@
             <template v-slot:append>
               <q-icon name="error" color="red-10" v-if="!isValidAddress && receiver !== ''"/>
               <q-icon name="close" @click="receiver = ''"/>&nbsp;
-              <q-icon name="mdi-qrcode-scan"/>&nbsp;
+              <q-icon name="mdi-qrcode-scan" @click.prevent="showQrScanner = true"/>&nbsp;
               <q-icon name="send" size="md" color="indigo-6" @click.prevent="addSearched()"/>
             </template>
           </q-input>
@@ -153,6 +157,7 @@ import { debounce } from 'quasar'
 import { thirdparty } from 'ethereumjs-wallet'
 import { Address } from '../../wallet'
 import { isValidTokenAddress } from 'src/wallet/chipnet'
+import QrScanner from '../qr-scanner.vue'
 
 export default {
   setup () {
@@ -179,6 +184,7 @@ export default {
       searchItem: [],
       chatDetails: {},
       chatInfo: [],
+      showQrScanner: false,
       convo: {
         chat_id: 1,
         messages: [
@@ -237,9 +243,11 @@ export default {
     chatId: Number
   },
   emits: ['back'],
+  components: {
+    QrScanner
+  },
   methods: {
     typingMessage: debounce(async function () {
-      console.log('typing typing...')
       this.isTyping = true
 
       await this.$refs.infiniteScroll.reset()
@@ -260,13 +268,10 @@ export default {
     },
     async addSearched () {
       await this.validateAddress()
-      console.log('valid: ', this.isValidAddress)
 
       if (this.isValidAddress) {
         this.searchItem.push(this.receiver)
         this.receiver = ''
-      } else {
-        console.log('not valid')
       }
       this.blur()
     },
@@ -297,6 +302,12 @@ export default {
       }
 
       this.isValidAddress = addressIsValid
+    },
+    onScannerDecode (content) {
+      const vm = this
+      vm.showQrScanner = false
+
+      this.receiver = content
     },
     // validateAddress: debounce(async function () {
     //   console.log('validating')

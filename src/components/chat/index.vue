@@ -1,14 +1,14 @@
 <template>
   <div class="q-px-md">
     <!-- Search -->
-    <div class="text-center q-pt-lg q-px-lg">
+    <!-- <div class="text-center q-pt-lg q-px-lg">
       <q-input bottom-slots v-model="search" placeholder="Search..." dense rounded outlined :dark="darkMode">
         <template v-slot:append>
           <q-icon name="search" />
         </template>
       </q-input>
-    </div>
-    <div>
+    </div> -->
+    <div class="q-pt-lg">
       <q-card
         class="br-15 q-pt-sm q-mx-none q-mb-lg q-mx-xs"
         :class="[ darkMode ? 'text-white pt-dark-card-2' : 'text-black',]"
@@ -17,7 +17,7 @@
         <!-- Top Icons -->
         <div class="text-center row no-wrap items-center q-pa-sm q-pt-md">
           <div class="col-2">
-            <q-icon size="sm" name='sym_o_filter_list'/>
+            <q-icon size="sm" name='sym_o_menu'/>
           </div>
 
           <div class="col-8 text-uppercase bold-text" style="font-size: 18px; font-weight: 500">
@@ -25,7 +25,7 @@
           </div>
 
           <div class="col-2">
-            <q-icon v-show="state !== 'appeal'" size="sm" name='sym_o_create' @click="$emit('openMessage', { info: null, type: 'compose' })" />
+            <q-icon v-show="state !== 'appeals'" size="sm" name='sym_o_create' @click="$emit('openMessage', { info: null, type: 'compose' })" />
           </div>
         </div>
 
@@ -44,9 +44,9 @@
           <div v-else>
             <!-- CHATS -->
             <q-pull-to-refresh @refresh="refreshData">
-              <q-list :style="`max-height: ${minHeight - 50}px`" style="overflow:auto;" v-if="state === 'chats' || state === 'archive'">
+              <q-list :style="`max-height: ${minHeight - 50}px`" style="overflow:auto;" v-if="state === 'chats' || state === 'trades'">
                 <div v-for="(chat, index) in chats" :key="index">
-                  <q-slide-item @left="onLeft" @right="onRight" :right-color="state === 'chats' ? 'red-6' : 'grey-5'" left-color="grey-5" class=" q-mx-lg">
+                  <q-slide-item @left="onLeft" @right="onRight" right-color="red-6" left-color="grey-5" class=" q-mx-lg">
                     <q-item clickable @click="$emit('openMessage', { info: chat, type: 'open-message'})" :class="darkMode ? 'pt-dark-card-2 text-white' : ''">
                       <q-item-section>
                         <div class="row" >
@@ -76,16 +76,10 @@
                     </q-item>
 
                     <template v-slot:right>
-                      <div v-if="state === 'chats'">
-                        <span class="text-white">Delete</span>&nbsp;
-                        <q-icon name="delete" />
-                      </div>
-                      <div v-if="state === 'archive'">
-                        <span class="text-white">Unarchive</span>&nbsp;
-                        <q-icon name="unarchive" />
-                      </div>
+                      <span class="text-white">Delete</span>&nbsp;
+                      <q-icon name="delete" />
                     </template>
-                    <template v-slot:left v-if="disableLeftSlider">
+                    <template v-slot:left>
                       <span class="text-white">Archive</span>&nbsp;
                       <q-icon name="archive" />
                     </template>
@@ -96,7 +90,7 @@
 
             <!-- APPEAL -->
             <q-pull-to-refresh @refresh="refreshData">
-              <q-list v-if="state === 'appeal'" ref="scrollTargetRef" :style="`height: ${minHeight - 100}px`" style="overflow: auto;">
+              <q-list v-if="state === 'appeals'" ref="scrollTargetRef" :style="`height: ${minHeight - 100}px`" style="overflow: auto;">
                 <q-infinite-scroll
                   ref="infiniteScroll"
                   :offset="0"
@@ -176,7 +170,7 @@ export default {
   data () {
     return {
       darkMode: this.$store.getters['darkmode/getStatus'],
-      minHeight: this.$q.platform.is.ios ? this.$q.screen.height - (95 + 190) : this.$q.screen.height - (70 + 170),
+      minHeight: this.$q.platform.is.ios ? this.$q.screen.height - (95 + 130) : this.$q.screen.height - (70 + 110),
       search: '',
       chats: [
         {

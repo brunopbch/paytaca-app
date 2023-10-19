@@ -5,17 +5,17 @@
     :style="{width: $q.platform.is.bex ? '375px' : '100%', margin: '0 auto', 'padding-bottom': $q.platform.is.ios ? '80px' : '0'}"
   >
     <div class="col row justify-evenly footer-btn-container q-ml-sm q-mr-sm q-gutter-xs">
-      <button class="footer-icon-btn q-mr-xs btn-ellipse" :class="{'text-white': darkMode}" @click="onSelectMenu('archive')">
-          <q-icon class="mb-2" :class="isActive('archive') ? 'default-text-color' : 'inactive-color'" size="30px" name="sym_o_archive"/>
-        <span>Archive</span>
+      <button class="footer-icon-btn q-mr-xs btn-ellipse" :class="{'text-white': darkMode}" @click="onSelectMenu('trades')">
+          <q-icon class="mb-2" :class="isActive('trades') ? 'default-text-color' : 'inactive-color'" size="30px" name="sym_o_currency_exchange"/>
+        <span>Trades</span>
       </button>
       <button class="footer-icon-btn q-mr-xs btn-ellipse" :class="{'text-white': darkMode}" @click="onSelectMenu('chats')">
           <q-icon class="mb-2" :class="isActive('chats') ? 'default-text-color' : 'inactive-color'" size="30px" name="chat_bubble_outline"/>
         <span>Chats</span>
       </button>
-      <button class="footer-icon-btn q-mr-xs btn-ellipse" :class="{'text-white': darkMode}" @click="onSelectMenu('appeal')">
-          <q-icon class="mb-2" :class="isActive('appeal') ? 'default-text-color' : 'inactive-color'" size="30px" name="sym_o_campaign"/>
-        <span>Appeal</span>
+      <button class="footer-icon-btn q-mr-xs btn-ellipse" :class="{'text-white': darkMode}" @click="onSelectMenu('appeals')">
+          <q-icon class="mb-2" :class="isActive('appeals') ? 'default-text-color' : 'inactive-color'" size="30px" name="sym_o_campaign"/>
+        <span>Appeals</span>
       </button>
       <button v-if="$q.platform.is.bex" class="footer-icon-btn q-mr-xs btn-ellipse" @click="expandBex">
         <i class="footer-icon mdi mdi-launch default-text-color"></i>
