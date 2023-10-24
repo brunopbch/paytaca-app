@@ -98,22 +98,37 @@
                       <!-- <q-item clickable @click="''" :class="darkMode ? 'pt-dark-card-2 text-white' : ''"> -->
                         <div class="q-px-lg" @click="$emit('openMessage', { info: chats[0], type: 'open-message'})">
                           <div class="q-pt-md q-px-md">
-                            <!-- <q-badge rounded dense :color="i%2 === 0 ? 'red-6' : 'blue-6'" :label="i%2 === 0 ? 'Release' : 'Refund'" /> -->
-                            <div class="q-pt-xs" style="font-weight: 500;">
-                              Order #001{{ i }}
-                            </div>
-                            <div style="font-size: 12px;" :class="darkMode ? 'text-grey-5' : 'text-grey-7'">
-                              <span style="font-size: 13px;">
-                                Hi there!
-                              </span>
-                              &nbsp;<q-icon size=".5em" name='circle'/>&nbsp;
-                              <span>
-                                {{ i*5 }} min ago
-                              </span>
+                            <q-badge outline rounded dense :color="darkMode ? 'blue-grey-3' : 'blue-grey-5'" :label="`Order #0001${i}`" />
+                            <div class="row q-pt-xs">
+                              <div class="q-pr-sm">
+                                <q-avatar size="md">
+                                  <q-img style="filter: grayscale(30%);" loading="lazy" spinner-color="white"  :src="`https://ui-avatars.com/api/?background=random&name=EllahJones&color=fffff`" />
+                                </q-avatar>
+                              </div>
+                              <div>
+                                <div class="q-pt-xs" style="font-size: 13px; font-weight: 500;">
+                                  Ellah Jones
+                                </div>
+                                <div style="font-size: 12px;" :class="darkMode ? 'text-grey-5' : 'text-grey-7'">
+                                  <span style="font-size: 13px;">
+                                    Hi there!
+                                  </span>es
+                                </div>
+                                <div style="font-size: 12px;" :class="darkMode ? 'text-grey-5' : 'text-grey-7'">
+                                  <span style="font-size: 13px;">
+                                    Hi there!
+                                  </span>
+                                  &nbsp;
+                                  &nbsp;<q-icon size=".5em" name='circle'/>&nbsp;
+                                  <span>
+                                    {{ i*5 }} min ago
+                                  </span>
+                                </div>
+                              </div>
                             </div>
                             <!-- <q-badge outline rounded dense :color="darkMode ? 'blue-grey-3' : 'blue-grey-5'" label="Fiat Ramp" /> -->
                           </div>
-                          <q-separator :dark="darkMode" class="q-mt-sm q-mx-sm"/>
+                          <!-- <q-separator :dark="darkMode" class="q-mt-sm q-mx-sm"/> -->
                         </div>
                       <!-- </q-item> -->
                     </div>
@@ -140,7 +155,7 @@
                             </div>
                             <q-badge outline rounded dense :color="darkMode ? 'blue-grey-3' : 'blue-grey-5'" label="Fiat Ramp" />
                           </div>
-                          <q-separator :dark="darkMode" class="q-mt-sm q-mx-sm"/>
+                          <!-- <q-separator :dark="darkMode" class="q-mt-sm q-mx-sm"/> -->
                         </div>
                       <!-- </q-item> -->
                     </div>
