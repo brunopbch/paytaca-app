@@ -759,6 +759,12 @@ export class DeliveryAddress {
 }
 
 export class Checkout {
+  static DeliveryTypes = Object.freeze({
+    LOCAL_DELIVERY: "local_delivery",
+    STORE_PICKUP: "store_pickup",
+    SHIPPING: "shipping",
+  })
+
   static parse(data) {
     return new Checkout(data)
   }
@@ -780,6 +786,7 @@ export class Checkout {
    * @param {Number} data.order_id
    * @param {CurrencyInfo} data.currency
    * @param {Object} data.cart
+   * @param {'local_delivery' | 'store_pickup' | 'shipping'} data.delivery_type
    * @param {Object} data.delivery_address
    * @param {Object} data.payment
    * @param {Number} [data.total_paid]
@@ -797,6 +804,7 @@ export class Checkout {
     this.checkoutId = data?.checkout_id
     this.currency = { code: data?.currency?.code, symbol: data?.currency?.symbol }
     this.cart = Cart.parse(data?.cart)
+    this.deliveryType = data?.delivery_type
     this.deliveryAddress = DeliveryAddress.parse(data?.delivery_address)
     this.payment = {
       bchPrice: BchPrice.parse(data?.payment?.bch_price),
@@ -968,6 +976,7 @@ export class Order {
    * @param {{ code:String, symbol:String }} data.currency
    * @param {Object} data.bch_price
    * @param {Object} [data.customer]
+   * @param {'local_delivery' | 'store_pickup' | 'shipping'} data.delivery_type
    * @param {Object} data.delivery_address
    * @param {Object[]} data.items
    * @param {Number} data.subtotal
@@ -996,6 +1005,7 @@ export class Order {
     this.currency = { code: data?.currency?.code, symbol: data?.currency?.symbol }
     this.bchPrice = BchPrice.parse(data?.bch_price)
     if (data?.customer) this.customer = Customer.parse(data?.customer)
+    this.deliveryType = data?.delivery_type
     this.deliveryAddress = DeliveryAddress.parse(data?.delivery_address)
     this.items = data?.items?.map?.(OrderItem.parse)
     this.subtotal = data?.subtotal
