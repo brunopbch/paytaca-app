@@ -760,7 +760,7 @@
 import { backend } from 'src/marketplace/backend'
 import { Checkout, Rider, Payment, Location } from 'src/marketplace/objects'
 import { TransactionListener, asyncSleep } from 'src/wallet/transaction-listener'
-import { errorParser, formatTimestampToText, getISOWithTimezone } from 'src/marketplace/utils'
+import { errorParser, formatTimestampToText, getISOWithTimezone, round } from 'src/marketplace/utils'
 import { Wallet, loadWallet } from 'src/wallet'
 import { debounce, useQuasar } from 'quasar'
 import { onBeforeRouteLeave, useRouter } from 'vue-router'
@@ -1143,8 +1143,8 @@ function fetchCheckout() {
     state: sessionLocation?.state,
     country: sessionLocation?.country,
     zip_code: sessionLocation?.zip_code,
-    longitude: parseFloat(sessionLocation?.longitude),
-    latitude: parseFloat(sessionLocation?.latitude),
+    longitude: round(parseFloat(sessionLocation?.longitude), 6),
+    latitude: round(parseFloat(sessionLocation?.latitude), 6),
   }
 
   if (!initialized.value && !Number.isNaN(parsedSessionLocationData?.longitude) && !Number.isNaN(parsedSessionLocationData?.latitude)) {  
@@ -1168,10 +1168,12 @@ function fetchCheckout() {
   }).catch(error => {
     if (initialized.value) return Promise.reject(error)
     const data = error?.response?.data
-    fetchCheckoutError.value = data?.detail
-    if (!fetchCheckoutError.value && typeof error?.message === 'string' && error?.message?.length < 200) {
-      fetchCheckoutError.value = error?.message
-    } 
+    let errorMsg = data?.detail ||
+      errorParser.firstElementOrValue(data?.non_field_errors)
+    if (!errorMsg && typeof error?.message === 'string' && error?.message?.length < 200) {
+      errorMsg = error?.message
+    }
+    fetchCheckoutError.value = errorMsg
     return Promise.reject(error)
   }).finally(() => {
     fetchingCheckout.value = false
