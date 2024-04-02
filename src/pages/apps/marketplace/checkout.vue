@@ -1942,8 +1942,10 @@ async function refreshPage(done=() => {}) {
     await Promise.all([
       fetchCheckout()
         .finally(() => resetFormData())
-        .then(() => { updateBchPrice() })
-        .then(() => fetchPayments())
+        .then(() => Promise.all([
+          fetchPayments(),
+          updateBchPrice()?.catch?.(console.error),
+        ]))
         .then(() => attemptCreatePayment()),
     ])
   } finally {
