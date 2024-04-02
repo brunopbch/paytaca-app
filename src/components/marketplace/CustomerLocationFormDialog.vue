@@ -23,6 +23,7 @@
             :dark="darkMode"
             v-model="formData.name"
             hide-bottom-space
+            placeholder="Name/label for the address"
             :error="Boolean(formErrors?.name)"
             :error-message="formErrors?.name"
           />
@@ -235,15 +236,6 @@ export default defineComponent({
         latitude: parseFloat(locationObj.value?.latitude),
         longitude: parseFloat(locationObj.value?.longitude),
       }
-    }
-    window.x = () => {
-      formData.value.name = 'Test'
-      formData.value.latitude = 11.203188
-      formData.value.longitude = 124.993976
-      reverseGeocodeFormData()
-        .then(() => {
-          formData.value.state = formData.value.state || 'Leyte'
-        })
     }
 
     const validCoordinates = computed(() => 

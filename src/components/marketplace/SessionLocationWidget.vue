@@ -6,7 +6,7 @@
       :class="darkMode ? '' : 'text-black'"
       @click="() => openLocationSelector = true"
     >
-      <q-item-section side class="q-pr-xs button button-text-primary" :class="getDarkModeClass(darkMode)">
+      <q-item-section side class="q-r-ml-md q-pr-xs button button-text-primary" :class="getDarkModeClass(darkMode)">
         <q-icon name="location_on" size="1.5rem"/>
       </q-item-section>
       <q-item-section class="text-bow" :class="getDarkModeClass(darkMode)">
@@ -86,36 +86,47 @@
             </q-btn>
           </div>
           <q-separator inset/>
-          <q-item
-            v-for="location in customerLocations" :key="location?.id"
-            clickable v-ripple
-            v-close-popup
-            @click="() => $store.commit('marketplace/setSelectedSessionLocationId', location?.id)"
-          >
+          <template v-for="location in customerLocations" :key="location?.id">
+            <q-item
+              clickable v-ripple
+              v-close-popup
+              @click="() => $store.commit('marketplace/setSelectedSessionLocationId', location?.id)"
+            >
+              <q-item-section side>
+                <q-radio
+                  :model-value="sessionLocation?.id" :val="location?.id" dense color="brandblue"
+                  @click="() => $store.commit('marketplace/setSelectedSessionLocationId', location?.id)"
+                />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label class="text-subtitle1">
+                  <template v-if="location?.name">
+                    {{ location?.name }} <span class="text-grey">#{{ location?.id }}</span>
+                  </template>
+                  <template v-else>Address #{{ location?.id }}</template>
+                </q-item-label>
+                <q-item-label class="text-caption ellipsis-2-lines">
+                  {{ location?.formatted }}
+                </q-item-label>
+                <q-item-label v-if="location?.validCoordinates" class="text-body2 text-underline">
+                </q-item-label>
+              </q-item-section>
+              <q-item-section side top style="padding-left:4px;">
+                <div class="row no-wrap" style="margin-top:auto;margin-bottom:auto;">
+                  <q-btn flat icon="edit" padding="sm" @click.stop="() => editLocation(location)"/>
+                  <q-separator vertical/>
+                  <q-btn flat icon="delete" padding="sm" color="red" @click.stop="() => deleteLocationConfirm(location?.id)"/>
+                </div>
+              </q-item-section>
+            </q-item>
+            <q-separator inset/>
+          </template>
+          <q-item clickable v-ripple @click="() => addNewAddress()">
             <q-item-section>
-              <q-item-label class="text-subtitle1">
-                <template v-if="location?.name">
-                  {{ location?.name }} <span class="text-grey">#{{ location?.id }}</span>
-                </template>
-                <template v-else>Address #{{ location?.id }}</template>
+              <q-item-label class="text-subtitle1 text-center">
+                <q-icon name="add" size="1.5em"/>
+                Add new address
               </q-item-label>
-              <q-item-label class="text-caption ellipsis-2-lines">
-                {{ location?.formatted }}
-              </q-item-label>
-              <q-item-label v-if="location?.validCoordinates" class="text-body2 text-underline">
-              </q-item-label>
-            </q-item-section>
-            <q-item-section side top style="padding-left:4px;">
-              <q-btn
-                flat
-                no-caps
-                padding="none sm"
-                class="q-r-mx-lg"
-                @click.stop="() => showLocationInDialog(location)"
-              >
-                <q-icon name="location_on"/>
-                <span class="text-underline">View in map</span>
-              </q-btn>
             </q-item-section>
           </q-item>
         </q-list>
@@ -130,8 +141,9 @@ import { useQuasar } from "quasar";
 import { useStore } from "vuex";
 import { ref, computed } from "vue";
 import PinLocationDialog from "src/components/PinLocationDialog.vue";
-import { LMap, LTileLayer, LMarker } from '@vue-leaflet/vue-leaflet'
 import { getDarkModeClass } from 'src/utils/theme-darkmode-utils'
+import { LMap, LTileLayer, LMarker } from '@vue-leaflet/vue-leaflet'
+import CustomerLocationFormDialog from "./CustomerLocationFormDialog.vue";
 
 const $q = useQuasar()
 const $store = useStore()
@@ -238,7 +250,7 @@ function setDeviceLocation(data, opts={ dialogTitle: '', keepSelectorOpen: false
         latitude: data?.lat,
         longitude: data?.lng,
       }
-      setTimeout(() => resolve(parsedLocation), 750)
+      setTimeout(() => resolve(parsedLocation), 350)
     })
   } else {
     reverseGeocodePromise = geolocationManager.reverseGeocode({ lat: data?.lat, lon: data?.lng })
@@ -260,6 +272,78 @@ function setDeviceLocation(data, opts={ dialogTitle: '', keepSelectorOpen: false
     })
 }
 
+async function addNewAddress(opts={ keepSelectorOpen: false }) {
+  const data = await dialogPromise({
+    component: PinLocationDialog,
+    componentProps: {
+      initLocation: {
+        latitude: parseFloat(deviceLocation?.value?.latitude),
+        longitude: parseFloat(deviceLocation?.value?.longitude)
+      },
+      headerText: 'Pin location',
+    }
+  })
+  const dialog = $q.dialog({
+    title: 'New address',
+    message: 'Getting address details',
+    color: 'brandblue',
+    progress: true, ok: false, cancel: false, persistent: true,
+    class: `br-15 pt-card-2 text-bow ${getDarkModeClass(darkMode.value)}`
+  })
+  try {
+    const response = await geolocationManager.reverseGeocode({ lat: data?.lat, lon: data?.lng })
+    const locationObj = Location.parse(response)
+    dialog.hide()
+    return editLocation(locationObj)
+      .then(newLocationObj => {
+        $store.commit('marketplace/setSelectedSessionLocationId', newLocationObj?.id)
+        if (!opts?.keepSelectorOpen) openLocationSelector.value = false
+        return newLocationObj
+      })
+  } catch (error) {
+    console.error(error)
+    dialog.update({ message: 'Unable to find location data'})
+  } finally {
+    dialog.update({ ok: true, progress: false, persistent: false })
+  }
+}
+
+function deleteLocationConfirm(locationId) {
+  $q.dialog({
+    title: 'Delete address',
+    message: 'Are you sure?',
+    color: 'brandblue',
+    ok: { color: 'red', noCaps: true, label: 'Delete', outlined: true },
+    cancel: { flat: true, color: 'grey', noCaps: true },
+    class: `br-15 pt-card-2 text-bow ${getDarkModeClass(darkMode.value)}`
+  }).onOk(() => deleteLocation(locationId))
+}
+
+function deleteLocation(locationId) {
+  const dialog = $q.dialog({
+    title: 'Removing address',
+    progress: true,
+    ok: false,
+    cancel: false,
+    color: 'brandblue',
+    class: `br-15 pt-card-2 text-bow ${getDarkModeClass(darkMode.value)}`
+  })
+
+  return $store.dispatch('marketplace/deleteCustomerLocation', locationId)
+    .finally(() => dialog.hide())
+}
+
+
+function editLocation(location = Location.parse()) {
+  return dialogPromise({
+    component: CustomerLocationFormDialog,
+    componentProps: {
+      location: location,
+      hideOnSave: true,
+      openPinOnShow: false,
+    }
+  })
+}
 
 async function dialogPromise(qDialogOptions) {
   return new Promise((resolve, reject) => {
